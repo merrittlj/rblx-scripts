@@ -29,10 +29,10 @@ local Tabs = {
     Games = Window:AddTab('Games')
 }
 
-local MainGroupBox = Tabs.Main:AddLeftGroupbox('Menu')
+local MainMenuGroupBox = Tabs.Main:AddLeftGroupbox('Menu')
 
-MainGroupBox:AddButton('Unload', function() Library:Unload() end)
-MainGroupBox:AddLabel('Unload bind'):AddKeyPicker('MainUnload', {
+MainMenuGroupBox:AddButton('Unload', function() Library:Unload() end)
+MainMenuGroupBox:AddLabel('Unload bind'):AddKeyPicker('MainUnload', {
     Default = 'F3',
 
     Text = 'Unload the menu',
@@ -40,10 +40,13 @@ MainGroupBox:AddLabel('Unload bind'):AddKeyPicker('MainUnload', {
     Callback = function() Library:Unload() end
 })
 
-MainGroupBox:AddLabel('Menu bind'):AddKeyPicker('MainMenu', { Default = 'F1', NoUI = true, Text = 'Menu keybind' })
+MainMenuGroupBox:AddLabel('Menu bind'):AddKeyPicker('MainMenu', { Default = 'F1', NoUI = true, Text = 'Menu keybind' })
 
 Library.ToggleKeybind = Options.MainMenu -- Allows you to have a custom keybind for the menu
 
+
+local MainScriptsGroupBox = Tabs.Main:AddLeftGroupbox('Scripts')
+MainScriptsGroupBox:AddButton('Dex Explorer', function() loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))() end)
 
 
 local UtilAimbotGroupBox = Tabs.Util:AddLeftGroupbox('Aimbot')
@@ -149,12 +152,6 @@ GamesWBGroupbox:AddDropdown('GamesWBMethod', {
     Text = 'Method',
     Tooltip = 'How to sort and choose the best word for typing',
 })
-Options.GamesWBActivate:OnPress(function()
-    print('pressed activate')
-end)
-Options.GamesWBClear:OnPress(function()
-    print('pressed clear')
-end)
 
 
 -- Library functions
@@ -301,11 +298,73 @@ end)
 
 -- Big Paintball Bullet TP
 task.spawn(function()
+	local bulletsFolder = game:GetService("Workspace")["__DEBRIS"].Projectiles
+	local gunsFolder = game:GetService("Workspace")["__DEBRIS"].Guns
+	local roundType = game:GetService("Workspace")["__VARIABLES"].RoundType.Value:lower()
+
+	local function getFirstTarget()
+		plrs = game:GetService("Players")
+		for _, gun in pairs(gunsFolder:GetChildren()) do
+			local target = plrs:FindFirstChild(gun.Name)
+			if roundType:match("ffa") and target.UserId ~= plr.UserId then return target end
+			if roundType:match("tdm") and target.Team ~= plr.Team then return target end
+		end
+	end
+	local function getClosestPart(table)
+	    local root = char:FindFirstChild("HumanoidRootPart")
+
+	    if not root then
+	        warn("No HumanoidRootPart found!")
+	        return nil
+	    end
+
+	    local closestPart = nil
+	    local shortestDistance = math.huge
+
+	    for _, part in ipairs(table) do
+	        if part:IsA("BasePart") then
+	            local distance = (part.Position - root.Position).Magnitude
+	            if distance < shortestDistance then
+	                shortestDistance = distance
+	                closestPart = part
+	            end
+	        end
+    	end
+
+    	return closestPart
+	end
+
     while true do
         task.wait()
         
         if Options.GamesBPBulletActivate:GetState() and Options.GamesBPShooting:GetState() and Modules["GamesBPBulletTP"] then
             print('check and tp bullets')
+            local target = getFirstTarget()
+            print(target.Name)
+            repeat 
+            	local validBullets = {}
+            	for _, part in pairs(bulletsFolder:GetChildren()) do
+	             	if part.Material ~= Enum.Material.ForceField then continue end
+	             	if roundType:match("tdm") then
+	             		if plr.Team == "Blue" and part.Color == Color3.fromRGB(255, 0, 0) then continue end
+	             		if plr.Team == "Red" and part.Color == Color3.fromRGB(0, 0, 255) then continue end
+	             	end
+
+	             	part.Anchored = false
+	             	part.CFrame = CFrame.new(Vector3.new(0,0,0))
+	             	table.insert(validBullets, part)
+            	end
+
+            	local closestBullet = getClosestPart(validBullets)
+            	print("bullet pos: " .. tostring(closestBullet.Position))
+            	print("player pos: " .. tostring(char:FindFirstChild("HumanoidRootPart").Position))
+
+            	-- TP Bullet
+            	--closestBullet.Position = target.Character:FindFirstChild("HumanoidRootPart").Position
+            	closestBullet.Position = Vector3.new(0,0,0)
+
+            	break
+            until not gunsFolder:FindFirstChild(target.Name)
         end
 
         if Library.Unloaded then break end
