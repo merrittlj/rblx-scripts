@@ -140,6 +140,16 @@ UtilFlingGroupBox:AddLabel('Move right'):AddKeyPicker('UtilFlingR', {
     NoUI = true,
 })
 
+UtilFlingGroupBox:AddDropdown('UtilFlingPlayers', {
+    SpecialType = 'Player',
+    Text = 'TP Player',
+    Tooltip = 'List of players to teleport to',
+
+    Callback = function(v)
+        game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = game:GetService("Players"):FindFirstChild(v).Character:FindFirstChild("HumanoidRootPart").CFrame
+    end
+})
+
 
 
 local GamesMMGroupbox = Tabs.Games:AddLeftGroupbox('Mortem Metallum')
@@ -469,8 +479,32 @@ Options.UtilFlingSS:OnClick(function()
     repeat task.wait() until not Options.UtilFlingSS:GetState()
 
     -- respawn
-    root.CFrame = prevFrame
     sel:Destroy()
+
+    ch = char
+    prt = Instance.new("Model", workspace)
+    z1 = Instance.new("Part", prt)
+    z1.Name = "Torso"
+    z1.CanCollide = false
+    z1.Anchored = true
+    z2 = Instance.new("Part", prt)
+    z2.Name = "Head"
+    z2.Anchored = true
+    z2.CanCollide = false
+    z3 = Instance.new("Humanoid", prt)
+    z3.Name = "Humanoid"
+    z1.Position = Vector3.new(0, 9999, 0)
+    z2.Position = Vector3.new(0, 9991, 0)
+    char = prt
+    wait(5)
+    char = ch
+    local w = nil
+    repeat
+        wait()
+        w = game.Players.LocalPlayer.Character:FindFirstChild("Head")
+    until w ~= nil
+    task.wait(1)
+    root.CFrame = prevFrame
 end)
 
 task.spawn(function()
