@@ -1,3 +1,9 @@
+-- RBLXHAX by iroblxianlover
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Loading RBLXHAX",
+    Text = "by irobloxianlover"
+})
+
 local MenuName = 'RBLXHAX'
 local Modules = {
     ['UtilAimbotEnable'] = false,
@@ -357,6 +363,12 @@ Options.UtilFlingSS:OnClick(function()
     local state = Options.UtilFlingSS:GetState()
     if not Modules["UtilFlingEnable"] or not state then return end
 
+    plr = game:GetService("Players").LocalPlayer
+    char = plr.Character
+    root = char:FindFirstChild("HumanoidRootPart")
+    hum = char:FindFirstChild("Humanoid")
+    mouse = plr:GetMouse()
+
     spawn(
         function()
             local message = Instance.new("Message", workspace)
@@ -366,11 +378,9 @@ Options.UtilFlingSS:OnClick(function()
         end
     )
 
-    local prevFrame = root.CFrame
-
     local prt = Instance.new("Model", workspace)
 
-    local ch = char
+    local ch = game.Players.LocalPlayer.Character
     local z1 = Instance.new("Part", prt)
     z1.Name = "Torso"
     z1.CanCollide = false
@@ -385,20 +395,20 @@ Options.UtilFlingSS:OnClick(function()
     z3.Name = "Humanoid"
     z1.Position = Vector3.new(0, 9999, 0)
     z2.Position = Vector3.new(0, 9991, 0)
-    char = prt
+    game.Players.LocalPlayer.Character = prt
     wait(5)
-    char = ch
+    game.Players.LocalPlayer.Character = ch
     wait(6)
 
     local sel = Instance.new("SelectionBox", root)
     sel.Adornee = root
     sel.Color3 = Color3.fromRGB(255,0,0)
 
-    char:FindFirstChild("Humanoid").RequiresNeck = false;
-    local humanoid = Instance.new("Humanoid", plr)
+    ch:FindFirstChild("Humanoid").RequiresNeck = false;
+    local humanoid = Instance.new("Humanoid", game.Players.LocalPlayer.Character)
     humanoid.RequiresNeck = false;
 
-    for _, v in pairs(char:GetChildren()) do
+    for _, v in pairs(plr.Character:GetChildren()) do
         if v ~= root and v.Name ~= "Humanoid" then
             v:Destroy()
         end
@@ -425,7 +435,6 @@ Options.UtilFlingSS:OnClick(function()
     bambam.Force = Vector3.new(power, 0, power)
     bambam.Location = root.Position
 
-    local flying = true
     local deb = true
     local maxspeed = 120
     local speed = 15
@@ -469,42 +478,15 @@ Options.UtilFlingSS:OnClick(function()
         else
             bv.velocity = Vector3.new(0, 0.1, 0)
         end
-    until not flying
+    until not Options.UtilFlingSS:GetState()
+    bv:Destroy()
+    bg:Destroy()
+
     ctrl = {f = 0, b = 0, l = 0, r = 0}
     lastctrl = {f = 0, b = 0, l = 0, r = 0}
     speed = 0
-    bg:Destroy()
-    bv:Destroy()
 
-    repeat task.wait() until not Options.UtilFlingSS:GetState()
-
-    -- respawn
-    sel:Destroy()
-
-    ch = char
-    prt = Instance.new("Model", workspace)
-    z1 = Instance.new("Part", prt)
-    z1.Name = "Torso"
-    z1.CanCollide = false
-    z1.Anchored = true
-    z2 = Instance.new("Part", prt)
-    z2.Name = "Head"
-    z2.Anchored = true
-    z2.CanCollide = false
-    z3 = Instance.new("Humanoid", prt)
-    z3.Name = "Humanoid"
-    z1.Position = Vector3.new(0, 9999, 0)
-    z2.Position = Vector3.new(0, 9991, 0)
-    char = prt
-    wait(5)
-    char = ch
-    local w = nil
-    repeat
-        wait()
-        w = game.Players.LocalPlayer.Character:FindFirstChild("Head")
-    until w ~= nil
-    task.wait(1)
-    root.CFrame = prevFrame
+    --hum.Health = 0
 end)
 
 task.spawn(function()

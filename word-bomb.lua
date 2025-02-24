@@ -1,6 +1,12 @@
 -- Word Bomb script by irobloxianlover
 -- credit for unpatchabomb's word list
-alreadyUsed = {}
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Loading Word Bomb",
+    Text = "by irobloxianlover"
+})
+
+local plr = game:GetService("Players").LocalPlayer
+local alreadyUsed = {}
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MarsQQ/Unpatchabomb/master/unpatchabomb_english_words", true))()
 
 function tableItemExists(array, val)
@@ -24,9 +30,15 @@ function findWord (str, where)
     return found
 end
 
-local inputService = game:GetService("UserInputService")
-inputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
+
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.RightAlt then
+        print("clearing")
+        alreadyUsed = {};
+    end
+end)
+
+game:GetService("UserInputService").InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftControl then
         print("typing")
         local textbox = plr.PlayerGui.GameUI.Container.GameSpace.DefaultUI
@@ -65,8 +77,5 @@ inputService.InputBegan:Connect(function(input, gameProcessed)
         end
         table.insert(alreadyUsed, foundWord)
         print(alreadyUsed)
-    elseif input.KeyCode == Enum.KeyCode.RightAlt then
-        print("clearing")
-        alreadyUsed = {}
     end
 end)
